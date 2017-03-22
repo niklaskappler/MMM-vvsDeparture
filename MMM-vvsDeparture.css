@@ -1,0 +1,28 @@
+.departure table {
+    padding-left: 0;
+    padding-right: 10px;
+    font-size: 80%;
+}
+
+.departure .time{
+
+}
+
+.departure .delay {
+    padding-left: 10px;
+    color: red;
+}
+
+.departure .nodelay{
+    padding-left: 10px;
+    color: greenyellow;
+}
+
+.departure .number{
+    padding-left: 10px;
+
+}
+.departure .direction {
+    padding-left: 10px;
+    text-align: left;
+}
