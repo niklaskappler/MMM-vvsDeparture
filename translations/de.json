@@ -1,7 +1,3 @@
 {
-  "TIME": ""
-, "DELAY": "Morgen"
-, "DIRECTION": "noch"
-, "LOADING": "Lade Termine &hellip;"
-, "EMPTY": "Keine Termine."
+	"DIRECTIONS_FROM": "Abfahrten von: "
 }

@@ -4,21 +4,23 @@
     font-size: 80%;
 }
 
-.departure .time{
-
-}
-
 .departure .delay {
     padding-left: 10px;
+}
+
+.departure .delay.color { 
     color: red;
 }
 
-.departure .nodelay{
+.departure .nodelay {
     padding-left: 10px;
+}
+
+.departure .nodelay.color {
     color: greenyellow;
 }
 
-.departure .number{
+.departure .number {
     padding-left: 10px;
 
 }
