@@ -1,42 +1,40 @@
-/**
- * Created by niklaskappler on 01.05.16.
+/* global Module */
+
+/* Magic Mirror
+ * Module: MMM-vvsDeparture
+ *
+ * By niklaskappler
+ * MIT Licensed.
  */
-
-
 var NodeHelper = require("node_helper");
-var request = require('request');
+var request = require("request");
+
+const BASE_URL = "https://efa-api.asw.io/api/v1";
 
 module.exports = NodeHelper.create({
-    //Override Start Function
-    start: function() {
-        var self = this;
-        self.update();
-        console.log("Starting node helper for: " + self.name);
+	/* socketNotificationReceived(notification, payload)
+	 * This method is called when a socket notification arrives.
+	 *
+	 * argument notification string - The identifier of the noitication.
+	 * argument payload mixed - The payload of the notification.
+	 */
+	socketNotificationReceived: function (notification, payload) {
+		var self = this;
 
-    },
+		if (notification === "GET_DEPARTURES") {
+			self.updateStation(payload.config.station_id);
 
-    // Override socketNotificationReceived method.
-    socketNotificationReceived: function(notification, payload) {
-        var that = this;
-        that.update(payload.config.station_id);
+			setInterval(function () { self.updateStation(payload.config.station_id); }, payload.config.reloadInterval);
+		}
+	},
 
-        if (notification === "GET_DEPARTURES") {
-            setInterval(function() {
-                that.update(payload.config.station_id);
-            }, payload.config.reloadInterval); //perform every 1000 milliseconds.
-        }
-    },
-
-    update: function (station_id) {
-        var that = this;
-        var url = "https://efa-api.asw.io/api/v1/station/"+station_id+"/departures/";
-        request(url, function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                that.sendSocketNotification("NEW_DEPARTURE", JSON.parse(body));
-            }
-        });
-    },
+	updateStation: function (stationId) {
+		var self = this;
+		var url = BASE_URL + "/station/" + stationId + "/departures/";
+		request(url, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				self.sendSocketNotification("NEW_DEPARTURE", JSON.parse(body));
+			}
+		});
+	}
 });
-
-
-

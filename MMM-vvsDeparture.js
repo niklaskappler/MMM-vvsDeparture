@@ -1,95 +1,164 @@
-/**
- * Created by niklaskappler on 28.04.16.
+/* global Module */
+
+/* Magic Mirror
+ * Module: MMM-vvsDeparture
+ *
+ * By niklaskappler
+ * MIT Licensed.
  */
+Module.register("MMM-vvsDeparture", {
 
+	defaults: {
+		station_id: 5002201,
+		station_name: "Libanonstraße",
+		maximumEntries: 6,
+		reloadInterval: 1 * 60 * 1000, // every minute
+		colorDelay: true,
+		colorNoDelay: true,
+		number: undefined,
+		direction: undefined
+	},
 
-Module.register("MMM-vvsDeparture",{
+	requiresVersion: "2.1.0", // Required version of MagicMirror
 
-    defaults:{
-        station_id: 5002201,
-        station_name: 'Libanonstraße',
-        maximumEntries: 6,
-        reloadInterval:  1 * 60 * 1000, // every minute
-    },
+	// Define required scripts.
+	getStyles: function () {
+		return ["MMM-vvsDeparture.css"];
+	},
 
-    // Define required scripts.
-    getStyles: function() {
-        return ["MMM-vvsDeparture.css"];
-    },
+	// Define required scripts.
+	getScripts: function () {
+		return ["moment.js"];
+	},
 
-    // Define required scripts.
-    getScripts: function() {
-        return ["moment.js"];
-    },
+	// Load translations files
+	getTranslations: function() {
+		return {
+			en: "translations/en.json",
+			de: "translations/de.json"
+		};
+	},
 
-    //Overrides start function
-    start: function () {
-        var self = this;
+	// Overrides start function.
+	start: function () {
+		var self = this;
+		Log.log("Starting module: " + self.name);
 
-        Log.log("Starting module: " + this.name);
-        this.departure = [];
-        self.sendSocketNotification("GET_DEPARTURES", {"config": this.config});
-    },
+		self.departure = [];
+		self.sendSocketNotification("GET_DEPARTURES", { "config": self.config });
+	},
 
-    // Override socket notification handler.
-    socketNotificationReceived: function(notification, payload) {
-        if (notification === "NEW_DEPARTURE") {
-            this.departure = payload;
-            this.updateDom();
-        }
-    },
+	// socketNotificationReceived from helper
+	socketNotificationReceived: function (notification, payload) {
+		var self = this;
 
-    // Override dom generator
-    getDom: function () {
-        var that = this;
+		if (notification === "NEW_DEPARTURE") {
+			self.departure = payload;
+			self.updateDom();
+		}
+	},
 
-        var wrapper = document.createElement("div");
-        var tableWrapper = document.createElement("table");
-        tableWrapper.className = "departure";
-        var headerWrappper = document.createElement("header");
-        headerWrappper.innerHTML ="Directions from: " + this.config.station_name;
-        wrapper.appendChild(headerWrappper);
+	// Override dom generator.
+	getDom: function () {
+		var self = this;
 
-        for(var e in that.departure){
-            if(e >= this.config.maximumEntries){
-                wrapper.appendChild(tableWrapper);
-                return wrapper;
-            }
-            var trWrapper = document.createElement("tr");
+		var wrapper = document.createElement("div");
 
-            var clockWrapper = document.createElement("td");
-            clockWrapper.className = "time";
+		var headerWrappper = document.createElement("header");
+		headerWrappper.innerHTML = self.translate("DIRECTIONS_FROM")  + self.config.station_name;
+		wrapper.appendChild(headerWrappper);
 
-            var hour = that.departure[e].departureTime.hour;
-            var min =  that.departure[e].departureTime.minute;
-            clockWrapper.innerHTML = moment(hour+":"+min, "HH:mm").subtract(that.departure[e].delay, "m").format("HH:mm");
+		var tableWrapper = document.createElement("table");
+		tableWrapper.className = "departure";
 
-            var delayWrapper = document.createElement("td");
-            if(that.departure[e].delay != 0){
-                delayWrapper.className = "delay";
-            }else {
-                delayWrapper.className = "nodelay";
-            }
-            delayWrapper.innerHTML = " +"+that.departure[e].delay;
+		var added = 0;
+		for (var i in self.departure) {
+			// If the maximum number of entries is reached
+			// stop adding and attach table
+			if (added >= self.config.maximumEntries) {
+				wrapper.appendChild(tableWrapper);
+				return wrapper;
+			}
 
-            var laneWrapper = document.createElement("td");
-            laneWrapper.className = "number";
-            laneWrapper.innerHTML = that.departure[e].number;
+			var currentValue = self.departure[i];
 
-            var directionWrapper = document.createElement("td");
-            directionWrapper.className = "direction";
-            directionWrapper.innerHTML = that.departure[e].direction;
+			// Skip if the configuration should hide this
+			if(!self.showNumber(currentValue.number) || !self.showDirection(currentValue.direction)) {
+				continue;
+			}
 
-            trWrapper.appendChild(clockWrapper);
-            trWrapper.appendChild(delayWrapper);
-            trWrapper.appendChild(laneWrapper);
-            trWrapper.appendChild(directionWrapper);
-            trWrapper.className = "small dimmed";
-            tableWrapper.appendChild(trWrapper);
+			// Row
+			var trWrapper = document.createElement("tr");
 
-        }
+			// Clock
+			var clockWrapper = document.createElement("td");
+			clockWrapper.className = "time";
+			var hour = currentValue.departureTime.hour;
+			var min = currentValue.departureTime.minute;
+			clockWrapper.innerHTML = moment(hour + ":" + min, "HH:mm")
+				.subtract(currentValue.delay, "m")
+				.format("HH:mm");
+			trWrapper.appendChild(clockWrapper);
 
-        wrapper.appendChild(tableWrapper);
-        return wrapper;
-    }
+			// Delay
+			var delayWrapper = document.createElement("td");
+			if (currentValue.delay != 0) {
+				delayWrapper.className = "delay";
+				if (self.config.colorDelay) {
+					delayWrapper.className += " color";
+				}
+			} else {
+				delayWrapper.className = "nodelay";
+				if (self.config.colorNoDelay) {
+					delayWrapper.className += " color";
+				}
+			}
+
+			delayWrapper.innerHTML = "+" + currentValue.delay;
+			trWrapper.appendChild(delayWrapper);
+
+			// Lane
+			var laneWrapper = document.createElement("td");
+			laneWrapper.className = "number";
+			laneWrapper.innerHTML = currentValue.number;
+			trWrapper.appendChild(laneWrapper);
+
+			// Direction
+			var directionWrapper = document.createElement("td");
+			directionWrapper.className = "direction";
+			directionWrapper.innerHTML = currentValue.direction;
+			trWrapper.appendChild(directionWrapper);
+
+			trWrapper.className = "small dimmed";
+			tableWrapper.appendChild(trWrapper);
+			added++;
+		}
+
+		wrapper.appendChild(tableWrapper);
+		return wrapper;
+	},
+
+	showNumber : function(number) {
+		var self = this;
+		return self.isValue(number, self.config.number);
+	},
+
+	showDirection : function(direction) {
+		var self = this;
+		return self.isValue(direction, self.config.direction);
+	},
+
+	isValue : function(input, value) {
+		if(!value || !input) {
+			return true;
+		} else if(value instanceof Array) {
+			return value.indexOf(input) >= 0;
+		} else if (typeof value === "string" || value instanceof String) {
+			return value === input;
+		} else if(typeof value === "function" || value instanceof Function) {
+			return value(input);
+		}
+		return false;
+	}
+
 });
