@@ -31,6 +31,7 @@ module.exports = NodeHelper.create({
 	updateStation: function (stationId) {
 		var self = this;
 		var url = BASE_URL + "/station/" + stationId + "/departures/";
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 		request(url, function (error, response, body) {
 			if (!error && response.statusCode == 200) {
 				self.sendSocketNotification("NEW_DEPARTURE", JSON.parse(body));
