@@ -9,8 +9,8 @@
 Module.register("MMM-vvsDeparture", {
 
 	defaults: {
-		station_id: 5002201,
-		station_name: "Libanonstraße",
+		station_id: 'de:08111:6112',
+		station_name: "",
 		maximumEntries: 6,
 		reloadInterval: 1 * 60 * 1000, // every minute
 		colorDelay: true,
@@ -53,7 +53,9 @@ Module.register("MMM-vvsDeparture", {
 		var self = this;
 
 		if (notification === "NEW_DEPARTURE") {
-			self.departure = payload;
+			self.departure = payload.stopEvents;
+			self.station_name = self.config.station_name ? self.config.station_name : payload.locations[0].disassembledName;
+			Log.info(payload.stopEvents);
 			self.updateDom();
 		}
 	},
@@ -65,7 +67,7 @@ Module.register("MMM-vvsDeparture", {
 		var wrapper = document.createElement("div");
 
 		var headerWrappper = document.createElement("header");
-		headerWrappper.innerHTML = self.translate("DIRECTIONS_FROM")  + self.config.station_name;
+		headerWrappper.innerHTML = self.translate("DIRECTIONS_FROM")  + self.station_name;
 		wrapper.appendChild(headerWrappper);
 
 		var tableWrapper = document.createElement("table");
@@ -73,6 +75,8 @@ Module.register("MMM-vvsDeparture", {
 
 		var added = 0;
 		for (var i in self.departure) {
+
+			Log.warn(self.departure[i]);
 			// If the maximum number of entries is reached
 			// stop adding and attach table
 			if (added >= self.config.maximumEntries) {
@@ -83,7 +87,7 @@ Module.register("MMM-vvsDeparture", {
 			var currentValue = self.departure[i];
 
 			// Skip if the configuration should hide this
-			if(!self.showNumber(currentValue.number) || !self.showDirection(currentValue.direction)) {
+			if(!self.showNumber(currentValue.transportation.number) || !self.showDirection(currentValue.transportation.destination.name)) {
 				continue;
 			}
 
@@ -93,16 +97,19 @@ Module.register("MMM-vvsDeparture", {
 			// Clock
 			var clockWrapper = document.createElement("td");
 			clockWrapper.className = "time";
-			var hour = currentValue.departureTime.hour;
-			var min = currentValue.departureTime.minute;
-			clockWrapper.innerHTML = moment(hour + ":" + min, "HH:mm")
+
+			var date = new Date(currentValue.departureTimePlanned);
+			clockWrapper.innerHTML = moment(date.getHours() + ":" + date.getMinutes(), "HH:mm")
 				.subtract(currentValue.delay, "m")
 				.format("HH:mm");
 			trWrapper.appendChild(clockWrapper);
 
 			// Delay
 			var delayWrapper = document.createElement("td");
-			if (currentValue.delay != 0) {
+			if("isRealtimeControlled" in currentValue && currentValue.isRealtimeControlled == true){
+				var delay = this.calculateDelay(currentValue.departureTimePlanned, currentValue.departureTimeEstimated);
+			}
+			if (delay.getMinutes() != 0) {
 				delayWrapper.className = "delay";
 				if (self.config.colorDelay) {
 					delayWrapper.className += " color";
@@ -113,20 +120,19 @@ Module.register("MMM-vvsDeparture", {
 					delayWrapper.className += " color";
 				}
 			}
-
-			delayWrapper.innerHTML = "+" + currentValue.delay;
+			delayWrapper.innerHTML = "+" + delay.getMinutes();
 			trWrapper.appendChild(delayWrapper);
 
 			// Lane
 			var laneWrapper = document.createElement("td");
 			laneWrapper.className = "number";
-			laneWrapper.innerHTML = currentValue.number;
+			laneWrapper.innerHTML = currentValue.transportation.number;
 			trWrapper.appendChild(laneWrapper);
 
 			// Direction
 			var directionWrapper = document.createElement("td");
 			directionWrapper.className = "direction";
-			directionWrapper.innerHTML = currentValue.direction;
+			directionWrapper.innerHTML = currentValue.transportation.destination.name;
 			trWrapper.appendChild(directionWrapper);
 
 			trWrapper.className = "small dimmed";
@@ -136,6 +142,13 @@ Module.register("MMM-vvsDeparture", {
 
 		wrapper.appendChild(tableWrapper);
 		return wrapper;
+	},
+
+	calculateDelay(departureTimePlanned, departureTimeEstimated){
+		timePlanned = new Date(departureTimePlanned);
+		timeEstimated = new Date(departureTimeEstimated);
+		var timeDiff = new Date(timeEstimated.getTime() - timePlanned.getTime());
+		return timeDiff
 	},
 
 	showNumber : function(number) {

@@ -9,7 +9,9 @@
 var NodeHelper = require("node_helper");
 var request = require("request");
 
-const BASE_URL = "https://efa-api.asw.io/api/v1";
+//const BASE_URL = "https://efa-api.asw.io/api/v1";
+const BASE_URL = "https://www3.vvs.de/mngvvs/XML_DM_REQUEST?";
+
 
 module.exports = NodeHelper.create({
 	/* socketNotificationReceived(notification, payload)
@@ -30,7 +32,14 @@ module.exports = NodeHelper.create({
 
 	updateStation: function (stationId) {
 		var self = this;
-		var url = BASE_URL + "/station/" + stationId + "/departures/";
+		var url = BASE_URL +
+			`limit=40&`+
+			`mode=direct&`+
+			`name_dm=${stationId}&`+
+			`outputFormat=rapidJSON&`+ //`outputFormat=JSON&`
+			`type_dm=any&`+
+			`useRealtime=1`;
+
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 		request(url, function (error, response, body) {
 			if (!error && response.statusCode == 200) {
