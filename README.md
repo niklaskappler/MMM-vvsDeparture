@@ -50,7 +50,8 @@ The following properties can be configured:
 	<tbody>
 		<tr>
 			<td><code>station_id</code></td>
-			<td>A value which represents the station id of the station. The id is combined of the area prefix `de:08111` and the unique station id e.g `6112` which result to `de:08111:2201. Here is a full list of all station with corespnding ids within the VVS public transport network, to find your station (<a href="https://www.openvvs.de/dataset/1f7ec4c1-b590-4751-a25b-57ef988c14b6/resource/d87d1f01-5c14-4d08-8452-e405a6472ab4/download/vvs_haltestellen.csv</a>).   
+			<td>A value which represents the station id of the station. The id is combined of the area prefix `de:08111` and the unique station id e.g `6112` which result to `de:08111:2201. Here is a full list of all station with 
+				corespnding ids within the VVS public transport network, to find your station (<a href="https://www.openvvs.de/dataset/1f7ec4c1-b590-4751-a25b-57ef988c14b6/resource/d87d1f01-5c14-4d08-8452-e405a6472ab4/download/vvs_haltestellen.csv">https://www.openvvs.de/dataset/1f7ec4c1-b590-4751-a25b-57ef988c14b6/resource/d87d1f01-5c14-4d08-8452-e405a6472ab4/download/vvs_haltestellen.csv</a>).   
 				<br><br><b>Possible values:</b> <code>integer</code>
 				<br><b>Default value:</b> <code>de:08111:6112</code>
 			</td>
