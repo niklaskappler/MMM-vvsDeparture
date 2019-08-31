@@ -26,6 +26,7 @@ var config = {
     modules: [
         {
             module: 'MMM-vvsDeparture',
+            position: "top_right",
             config: {
                 station_id: '<YOUR_STATION_ID_HERE>',
                 // See below for more configurable options

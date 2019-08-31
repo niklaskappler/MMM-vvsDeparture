@@ -55,7 +55,6 @@ Module.register("MMM-vvsDeparture", {
 		if (notification === "NEW_DEPARTURE") {
 			self.departure = payload.stopEvents;
 			self.station_name = self.config.station_name ? self.config.station_name : payload.locations[0].disassembledName;
-			Log.info(payload.stopEvents);
 			self.updateDom();
 		}
 	},
@@ -120,7 +119,11 @@ Module.register("MMM-vvsDeparture", {
 					delayWrapper.className += " color";
 				}
 			}
-			delayWrapper.innerHTML = "+" + delay.getMinutes();
+			if(isNaN(delay.getMinutes())){
+				delayWrapper.innerHTML = self.translate("CANCELED");
+			} else {
+				delayWrapper.innerHTML = "+" +delay.getMinutes();
+			}
 			trWrapper.appendChild(delayWrapper);
 
 			// Lane
