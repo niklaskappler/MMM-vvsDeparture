@@ -42,17 +42,20 @@ Module.register("MMM-vvsDeparture", {
 	// Overrides start function.
 	start: function () {
 		var self = this;
-		Log.log("Starting module: " + self.name);
+		Log.log("Starting module: " + self.name + "as" + self.identifier);
 
 		self.departure = [];
-		self.sendSocketNotification("GET_DEPARTURES", { "config": self.config });
+		self.sendSocketNotification("GET_DEPARTURES",
+			{
+				"config": self.config,
+				"identifier": this.identifier,
+			});
 	},
 
 	// socketNotificationReceived from helper
 	socketNotificationReceived: function (notification, payload) {
 		var self = this;
-
-		if (notification === "NEW_DEPARTURE") {
+		if (notification === this.identifier+"_NEW_DEPARTURES") {
 			self.departure = payload.stopEvents;
 			self.station_name = self.config.station_name ? self.config.station_name : payload.locations[0].disassembledName;
 			self.updateDom();
@@ -74,8 +77,6 @@ Module.register("MMM-vvsDeparture", {
 
 		var added = 0;
 		for (var i in self.departure) {
-
-			Log.warn(self.departure[i]);
 			// If the maximum number of entries is reached
 			// stop adding and attach table
 			if (added >= self.config.maximumEntries) {
