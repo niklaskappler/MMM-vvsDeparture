@@ -68,6 +68,9 @@ Module.register("MMM-vvsDeparture", {
 
 		var headerWrappper = document.createElement("header");
 		headerWrappper.innerHTML = self.translate("DIRECTIONS_FROM")  + self.station_name;
+		if (self.config.offset != undefined) {
+			headerWrappper.innerHTML += " in " + self.config.offset.toString() + " mins";
+		}
 		wrapper.appendChild(headerWrappper);
 
 		var tableWrapper = document.createElement("table");
