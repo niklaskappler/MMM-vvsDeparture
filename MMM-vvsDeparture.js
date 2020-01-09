@@ -16,7 +16,8 @@ Module.register("MMM-vvsDeparture", {
 		colorDelay: true,
 		colorNoDelay: true,
 		number: undefined,
-		direction: undefined
+		direction: undefined,
+		offset: undefined
 	},
 
 	requiresVersion: "2.1.0", // Required version of MagicMirror
