@@ -69,12 +69,7 @@ Module.register("MMM-vvsDeparture", {
 
 		var wrapper = document.createElement("div");
 
-		var headerWrappper = document.createElement("header");
-		headerWrappper.innerHTML = self.translate("DIRECTIONS_FROM")  + self.station_name;
-		if (self.config.offset != undefined) {
-			headerWrappper.innerHTML += " in " + self.config.offset.toString() + " mins";
-		}
-		wrapper.appendChild(headerWrappper);
+		wrapper.appendChild(self.getHeaderDom());
 
 		var tableWrapper = document.createElement("table");
 		tableWrapper.className = "departure";
@@ -151,6 +146,35 @@ Module.register("MMM-vvsDeparture", {
 		wrapper.appendChild(tableWrapper);
 		return wrapper;
 	},
+
+	stringTemplateParser: function (expression, valueObj) {
+		const templateMatcher = /{{\s?([^{}\s]*)\s?}}/g;
+		let text = expression.replace(templateMatcher, (substring, value, index) => {
+			value = valueObj[value];
+			return value;
+		});
+		return text
+	},
+
+	getHeaderDom: function () {
+		var self = this;
+
+		var headerWrappper = document.createElement("header");
+		if(self.config.offset && self.config.offset >= 0){
+			headerWrappper.innerHTML = self.stringTemplateParser(
+				self.translate("DIRECTIONS_FROM_WITH_OFFSET"),
+				{
+					STATION: self.station_name,
+					OFFSET: self.config.offset,
+				});
+		}else {
+			headerWrappper.innerHTML = self.stringTemplateParser(
+				self.translate("DIRECTIONS_FROM"),
+				{STATION: self.station_name});
+		}
+		return headerWrappper;
+	},
+
 
 	calculateDelay(departureTimePlanned, departureTimeEstimated){
 		timePlanned = new Date(departureTimePlanned);
