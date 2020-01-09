@@ -22,13 +22,20 @@ module.exports = NodeHelper.create({
 		var self = this;
 
 		if (notification === "GET_DEPARTURES") {
-			self.updateStation(payload.config.station_id, payload.config.offset);
-
-			setInterval(function () { self.updateStation(payload.config.station_id, payload.config.offset); }, payload.config.reloadInterval);
+			self.retrieveStationData(
+				payload.config.station_id,
+				payload.identifier,
+				payload.config.offset);
+			setInterval(function () {
+					self.retrieveStationData(
+						payload.config.station_id,
+						payload.identifier,
+						payload.config.offset);
+				}, payload.config.reloadInterval);
 		}
 	},
 
-	updateStation: function (stationId, offset) {
+	retrieveStationData: function (stationId, moduleIdentifier, offset) {
 		var self = this;
 		var url = BASE_URL +
 			`limit=40&`+
@@ -51,7 +58,7 @@ module.exports = NodeHelper.create({
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 		request(url, function (error, response, body) {
 			if (!error && response.statusCode == 200) {
-				self.sendSocketNotification("NEW_DEPARTURE", JSON.parse(body));
+				self.sendSocketNotification(moduleIdentifier+"_NEW_DEPARTURES", JSON.parse(body));
 			}
 		});
 	}
