@@ -116,6 +116,15 @@ The following properties can be configured:
 				<br><b>Default value:</b> <code>undefined</code>
 			</td>
 		</tr>
+		<tr>
+			<td>
+			    <code>offset</code>
+			</td>
+     		 <td>Define the offset in minutes. Show connections only starting in the offset minutes.
+      			<br><br><b>Possible values:</b> <code>integer</code>
+				<br><b>Default value:</b> <code>undefined</code>
+			</td>
+		</tr>
 	</tbody>
 </table>
 
