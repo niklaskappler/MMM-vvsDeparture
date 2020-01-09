@@ -24,16 +24,18 @@ module.exports = NodeHelper.create({
 		if (notification === "GET_DEPARTURES") {
 			self.retrieveStationData(
 				payload.config.station_id,
+				payload.config.offset,
 				payload.identifier);
 			setInterval(function () {
-					self.retrieveStationData(
-						payload.config.station_id,
-						payload.identifier);
-				}, payload.config.reloadInterval);
+				self.retrieveStationData(
+					payload.config.station_id,
+					payload.config.offset,
+					payload.identifier);
+			}, payload.config.reloadInterval);
 		}
 	},
 
-	retrieveStationData: function (stationId, moduleIdentifier) {
+	retrieveStationData: function (stationId, offset, moduleIdentifier) {
 		var self = this;
 		var url = BASE_URL +
 			`limit=40&`+
@@ -42,6 +44,16 @@ module.exports = NodeHelper.create({
 			`outputFormat=rapidJSON&`+ //`outputFormat=JSON&`
 			`type_dm=any&`+
 			`useRealtime=1`;
+
+		if (offset != undefined) {
+			var d = new Date();
+			d.setMinutes(d.getMinutes() + offset);
+			url += `&itdDateYear=` + d.getFullYear().toString();
+			url += `&itdDateMonth=` + (d.getMonth() + 1).toString();
+			url += `&itdDateDay=` + d.getDate().toString();
+			url += `&itdTimeHour=` + d.getHours().toString();
+			url += `&itdTimeMinute=` + d.getMinutes().toString();
+		}
 
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 		request(url, function (error, response, body) {
