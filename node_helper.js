@@ -24,18 +24,18 @@ module.exports = NodeHelper.create({
 		if (notification === "GET_DEPARTURES") {
 			self.retrieveStationData(
 				payload.config.station_id,
-				payload.identifier,
-				payload.config.offset);
+				payload.config.offset,
+				payload.identifier);
 			setInterval(function () {
-					self.retrieveStationData(
-						payload.config.station_id,
-						payload.identifier,
-						payload.config.offset);
-				}, payload.config.reloadInterval);
+				self.retrieveStationData(
+					payload.config.station_id,
+					payload.config.offset,
+					payload.identifier);
+			}, payload.config.reloadInterval);
 		}
 	},
 
-	retrieveStationData: function (stationId, moduleIdentifier, offset) {
+	retrieveStationData: function (stationId, offset, moduleIdentifier) {
 		var self = this;
 		var url = BASE_URL +
 			`limit=40&`+
